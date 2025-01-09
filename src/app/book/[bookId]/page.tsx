@@ -4,22 +4,35 @@ import React from "react";
 import DownloadButton from "./components/DownloadButton";
 
 const SingleBookPage = async ({ params }: { params: { bookId: string } }) => {
+  
+  //validate params
+  const { bookId } = params;
+  if(!bookId) {
+    throw new Error("Book ID is missing.");
+  }
   let book: Book | null = null;
   try {
     const response = await fetch(
-      `${process.env.BACKEND_URL}/books/${params.bookId}`
+      `${process.env.BACKEND_URL}/books/${bookId}`, {
+        cache: "no-store",
+      }
     );
     if (!response.ok) {
-      throw new Error("Error fetching book");
+      throw new Error(`Failed to fetch book with ID: ${bookId}`);
     }
     book = await response.json();
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (err: unknown) {
-    throw new Error("Error fetching book");
+    console.error("Error fetching book:", err);
+    throw new Error("Error fetching book data. Please try again later.");
   }
 
   if (!book) {
-    throw new Error("Book not found");
+    return (
+      <div className="mx-auto max-w-4xl px-5 py-10 text-center text-primary-950">
+        <h2 className="text-3xl font-bold">Book Not Found</h2>
+        <p className="mt-4">The requested book could not be found.</p>
+      </div>
+    );
   }
 
   return (
